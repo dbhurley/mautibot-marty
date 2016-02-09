@@ -1,0 +1,7 @@
+{
+  "name": "mautic/scripts",
+  "description": "Scripts for various Mautic processes",
+  "require": {
+    "joomla/database": "~1.1"
+  }
+}
