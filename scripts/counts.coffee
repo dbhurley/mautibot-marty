@@ -14,6 +14,10 @@ module.exports = (robot) ->
     exec "php /opt/mautibot/php/fetch_download_counts.php", (err, stdout, stderr) ->
       data = JSON.parse(stdout);
       msg.send "There has been #{data.total} total unique downloads and #{data.latest.download_count} for #{data.latest.title}"
+      message = "Counts by context: \n"
+      for k,v of data.context
+        message = message + "    #{v} #{k}\n"
+      msg.send message
 
   #
   # Get a count of hosted instances

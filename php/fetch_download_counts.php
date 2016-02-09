@@ -29,10 +29,26 @@ $latest = $db->setQuery(
     0, 1
 )->loadAssoc();
 
+// Get counts based on context
+$results = $db->setQuery(
+    $db->getQuery(true)
+        ->select('tell_us_about_yourself as context, count(*) as number')
+        ->from('#__form_results_5_downloadma')
+        ->where('length(tell_us_about_yourself) > 0')
+        ->group('tell_us_about_yourself')
+        ->order('number DESC')
+)->loadObjectList();
+$context = [];
+foreach ($results as $result) {
+    $result->context = str_replace('&#39;', "'", $result->context);
+    $context[$result->context] = $result->number;
+}
+
 header('Content-Type: application/json');
 echo json_encode(
     [
-        'total'  => $total,
-        'latest' => $latest
+        'total'   => $total,
+        'latest'  => $latest,
+        'context' => $context
     ]
 );
