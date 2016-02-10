@@ -4,7 +4,7 @@
 # xkcd <num> - XKCD comic matching the supplied number
 # xkcd <search> - XKCD comic matching the search
 module.exports = (robot) ->
-  robot.respond /xkcd\s?(\d+)?$/i, (msg) ->
+  robot.hear /xkcd\s?(\d+)?$/i, (msg) ->
     xkcd(msg, msg.match[1])
 
   robot.respond /xkcd\s([^\s\d].+)/i, (msg) ->
