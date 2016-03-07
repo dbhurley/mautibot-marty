@@ -28,11 +28,11 @@ $signups = $dashboardDb->setQuery(
     $dashboardDb->getQuery(true)
         ->select('count(*) as count, CONCAT_WS("/", MONTH(created_at), YEAR(created_at)) as date')
         ->from('#__instances')
-        ->where('status = 2')
+        ->where('status = 1')
+        ->where('created_at >= DATE_SUB(DATE_FORMAT(CURDATE(), \'%Y-%m-01\'), INTERVAL 6 MONTH) AND created_at <  DATE_FORMAT(CURDATE(), \'%Y-%m-01\')')
         ->group('YEAR(created_at), MONTH(created_at)')
-        ->order('YEAR(created_at) DESC, MONTH(created_at) DESC')
-    , 0, 6)
-->loadObjectList();
+        ->order('YEAR(created_at), MONTH(created_at)')
+    )->loadAssocList();
 
 // Downloads
 $downloads = $communityDb->setQuery(
@@ -41,188 +41,92 @@ $downloads = $communityDb->setQuery(
         ->from('#__asset_downloads')
         ->innerJoin('#__assets a ON a.id = asset_id')
         ->where('a.category_id = 2')
+        ->where('date_download >= DATE_SUB(DATE_FORMAT(CURDATE(), \'%Y-%m-01\'), INTERVAL 6 MONTH) AND date_download <  DATE_FORMAT(CURDATE(), \'%Y-%m-01\')')
         ->group('YEAR(date_download), MONTH(date_download)')
-        ->order('YEAR(date_download) DESC, MONTH(date_download) DESC')
-    , 0, 6)
-    ->loadObjectList();
+        ->order('YEAR(date_download), MONTH(date_download)')
+    )->loadAssocList();
+
+list ($signupImage, $signupData) = makeImage("SaaS Signups", $signups);
+list ($downloadImage, $downloadData) = makeImage("Downloads", $downloads);
 
 header('Content-Type: application/json');
 echo json_encode(
     [
-        'downloads'       => $downloads,
-        'signups'         => $signups,
-        'signup_image'    => makeImage("SaaS Signups", $signups),
-        'downloads_image' => makeImage("Downloads", $downloads)
+        'signups'         => $signupData,
+        'signup_image'    => $signupImage,
+        'downloads'       => $downloadData,
+        'download_image'  => $downloadImage
     ]
 );
 
 function makeImage($graphTitle, $results)
 {
-    //Setting the chart variables
-    $xLabel 	= "Count";
-    $yLabel 	= "Month";
-
     //getting the maximum and minimum values for Y
-    $data = [];
+    $values = [];
     foreach ($results as $result) {
-        $data[$result->date] = $result->count;
+        $values[$result['date']] = (int) $result['count'];
     }
 
-    //minimum
-    $places = strlen(current($data));
-    $mod    = pow(10, $places-1);
-    $min    = $mod - current($data);
-
-    //maximum
-    $places = strlen(end($data));
-    $mod    = pow(10, $places-1);
-    $max 	= $mod + end($data);
-
-    //storing those min and max values into an array
-    $yAxis 	= array("min"=>$min, "max"=>$max);
-
-    //------------------------------------------------
-    // Preparing the Canvas
-    //------------------------------------------------
-    //setting the image dimensions
-    $canvasWidth  = 500;
-    $canvasHeight = 300;
-    $perimeter    = 50;
-
-    //creating the canvas
-    $canvas = imagecreatetruecolor($canvasWidth, $canvasHeight);
-
-    //allocating the colors
-    $white     = imagecolorallocate($canvas, 255, 255, 255);
-    $black     = imagecolorallocate($canvas, 0,0,0);
-    $yellow    = imagecolorallocate($canvas, 248, 255, 190);
-    $blue      = imagecolorallocate($canvas, 3,12,94);
-    $grey      = imagecolorallocate($canvas, 102, 102, 102);
-    $lightGrey = imagecolorallocate($canvas, 216, 216, 216);
-
-    //getting the size of the fonts
-    $fontwidth  = imagefontwidth(2);
-    $fontheight = imagefontheight(2);
-
-    //filling the canvas with light grey
-    imagefill($canvas, 0,0, $lightGrey);
+    $img_width=450;
+    $img_height=300;
+    $margins=20;
 
 
-    //------------------------------------------------
-    // Preparing the grid
-    //------------------------------------------------
-    //getting the size of the grid
-    $gridWidth  = $canvasWidth  - ($perimeter*2);
-    $gridHeight = $canvasHeight - ($perimeter*2);
+    # ---- Find the size of graph by substracting the size of borders
+    $graph_width=$img_width - $margins * 2;
+    $graph_height=$img_height - $margins * 2;
+    $img=imagecreate($img_width,$img_height);
 
-    //getting the grid plane coordinates
-    $c1 = array("x"=>$perimeter, "y"=>$perimeter);
-    $c2 = array("x"=>$gridWidth+$perimeter, "y"=>$perimeter);
-    $c3 = array("x"=>$gridWidth+$perimeter, "y"=>$gridHeight+$perimeter);
-    $c4 = array("x"=>$perimeter, "y"=>$gridHeight+$perimeter);
 
-    //------------------------------------------------
-    //creating the grid plane
-    //------------------------------------------------
-    imagefilledrectangle($canvas, $c1['x'], $c1['y'], $c3['x'], $c3['y'], $white);
+    $bar_width=20;
+    $total_bars=count($values);
+    $gap= ($graph_width- $total_bars * $bar_width ) / ($total_bars +1);
 
-    //finding the size of the grid squares
-    $sqW = $gridWidth/count($data);
-    $sqH = $gridHeight/$yAxis['max'];
 
-    //------------------------------------------------
-    //drawing the vertical lines and axis values
-    //------------------------------------------------
-    $verticalPadding = $sqW/2;
-    $increment = 0;
-    foreach($data as $assoc => $value)
-    {
-        //drawing the line
-        imageline($canvas, $verticalPadding+$c4['x']+$increment, $c4['y'], $verticalPadding+$c1['x']+$increment, $c1['y'], $black);
+    # -------  Define Colors ----------------
+    $bar_color=imagecolorallocate($img,0,64,128);
+    $background_color=imagecolorallocate($img,240,240,255);
+    $border_color=imagecolorallocate($img,200,200,200);
+    $line_color=imagecolorallocate($img,220,220,220);
 
-        //axis values
-        $wordWidth = strlen($assoc)*$fontwidth;
-        $xPos = $c4['x']+$increment+$verticalPadding-($wordWidth/2);
-        ImageString($canvas, 2, $xPos, $c4['y'], $assoc, $black);
+    # ------ Create the border around the graph ------
 
-        $increment += $sqW;
+    imagefilledrectangle($img,1,1,$img_width-2,$img_height-2,$border_color);
+    imagefilledrectangle($img,$margins,$margins,$img_width-1-$margins,$img_height-1-$margins,$background_color);
+
+
+    # ------- Max value is required to adjust the scale	-------
+    $max_value=max($values);
+    $ratio= $graph_height/$max_value;
+
+    # -------- Create scale and draw horizontal lines  --------
+    $horizontal_lines=20;
+    $horizontal_gap=$graph_height/$horizontal_lines;
+
+    for($i=1;$i<=$horizontal_lines;$i++){
+        $y=$img_height - $margins - $horizontal_gap * $i ;
+        imageline($img,$margins,$y,$img_width-$margins,$y,$line_color);
+        $v=intval($horizontal_gap * $i /$ratio);
+        imagestring($img,0,5,$y-5,$v,$bar_color);
+
     }
 
-    //------------------------------------------------
-    //drawing the horizontel lines and axis labels
-    //------------------------------------------------
-    //resetting the increment back to 0
-    $increment = 0;
-
-    for($i=$yAxis['min']; $i<$yAxis['max']; $i++)
-    {
-
-        //main lines
-
-        //often the y-values can be in the thousands, if this is the case then we don't want to draw every single
-        //line so we need to make sure that a line is only drawn every 50 or 100 units.
-
-        if($i%$mod==0){
-            //drawing the line
-            imageline($canvas, $c4['x'], $c4['y']+$increment, $c3['x'], $c3['y']+$increment, $black);
-
-            //axis values
-            $xPos = $c1['x']-($fontwidth*strlen($i))-5;
-            ImageString($canvas, 2, $xPos, $c4['y']+$increment-($fontheight/2), $i, $black);
-
-        }
-        //tics
-        //these are the smaller lines between the longer, main lines.
-        elseif(($mod/5)>1 && $i%($mod/5)==0)
-        {
-            imageline($canvas, $c4['x'], $c4['y']+$increment, $c4['x']+10, $c4['y']+$increment, $grey);
-        }
-        //because these lines begin at the bottom we want to subtract
-        $increment-=$sqH;
+    # ----------- Draw the bars here ------
+    for($i=0;$i< $total_bars; $i++){
+        # ------ Extract key and value pair from the current pointer position
+        list($key,$value)=each($values);
+        $x1= $margins + $gap + $i * ($gap+$bar_width) ;
+        $x2= $x1 + $bar_width;
+        $y1=$margins +$graph_height- intval($value * $ratio) ;
+        $y2=$img_height-$margins;
+        imagestring($img,0,$x1+3,$y1-10,$value,$bar_color);
+        imagestring($img,0,$x1+3,$img_height-15,$key,$bar_color);
+        imagefilledrectangle($img,$x1,$y1,$x2,$y2,$bar_color);
     }
 
-    //getting the size of the grid
-    $gridWidth  = $canvasWidth  - ($perimeter*2);
-    $gridHeight = $canvasHeight - ($perimeter*2);
+    $name = uniqid(time()).'.png';
+    imagepng($img, '/usr/share/nginx/html/'.$name);
+    imagedestroy($img);
 
-    //getting the grid plane coordinates
-    $c1 = array("x"=>$perimeter, "y"=>$perimeter);
-    $c2 = array("x"=>$gridWidth+$perimeter, "y"=>$perimeter);
-    $c3 = array("x"=>$gridWidth+$perimeter, "y"=>$gridHeight+$perimeter);
-    $c4 = array("x"=>$perimeter, "y"=>$gridHeight+$perimeter);
-
-    //imagefilledrectangle($canvas, $c1['x'], $c1['y'], $c3['x'], $c3['y'], $white);
-
-    //finding the size of the grid squares
-    $sqW = $gridWidth/count($data);
-    $sqH = $gridHeight/$yAxis['max'];
-
-
-    //------------------------------------------------
-    // Making the vertical bars
-    //------------------------------------------------
-    $increment = 0; 		//resetting the increment value
-    $barWidth = $sqW*.2; 	//setting a width size for the bars, play with this number
-    foreach($data as $assoc=>$value)
-    {
-        $yPos = $c4['y']-($value*$sqH);
-        $xPos = $c4['x']+$increment+$verticalPadding-($barWidth/2);
-        imagefilledrectangle($canvas, $xPos, $c4['y'], $xPos+$barWidth, $yPos, $blue);
-        $increment += $sqW;
-    }
-
-    //Graph Title
-    ImageString($canvas, 2, ($canvasWidth/2)-(strlen($graphTitle)*$fontwidth)/2, $c1['y']-($perimeter/2), $graphTitle, $yellow);
-
-    //X-Axis
-    ImageString($canvas, 2, ($canvasWidth/2)-(strlen($xLabel)*$fontwidth)/2, $c4['y']+($perimeter/2), $xLabel, $yellow);
-
-    //Y-Axis
-    ImageStringUp($canvas, 2, $c1['x']-$fontheight*3, $canvasHeight/2+(strlen($yLabel)*$fontwidth)/2, $yLabel, $yellow);
-    $name = uniqid(time()).'.jpeg';
-
-    imagejpeg($canvas, '/usr/share/nginx/html/'.$name);
-    imagedestroy($canvas);
-
-    return $name;
+    return [$name, $values];
 }
