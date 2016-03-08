@@ -53,7 +53,7 @@ $downloadImage = makeImage("Downloads", $downloads);
 $lastValue = 0;
 foreach ($signups as $k => &$v) {
     if ($lastValue) {
-        $v['diff'] = 100 * ($v['count'] - $lastValue) / $v['count'];
+        $v['diff'] = round(100 * ($v['count'] - $lastValue) / $lastValue, 1);
     } else {
         $v['diff'] = 0;
     }
@@ -63,7 +63,7 @@ foreach ($signups as $k => &$v) {
 $lastValue = 0;
 foreach ($downloads as $k => &$v) {
     if ($lastValue) {
-        $v['diff'] = 100 * ($v['count'] - $lastValue) / $v['count'];
+        $v['diff'] = round(100 * ($v['count'] - $lastValue) / $lastValue, 1);
     } else {
         $v['diff'] = 0;
     }
@@ -74,9 +74,9 @@ foreach ($downloads as $k => &$v) {
 header('Content-Type: application/json');
 echo json_encode(
     [
-        'signups'         => $signupData,
+        'signups'         => $signups,
         'signup_image'    => $signupImage,
-        'downloads'       => $downloadData,
+        'downloads'       => $downloads,
         'download_image'  => $downloadImage
     ]
 );
@@ -150,5 +150,5 @@ function makeImage($graphTitle, $results)
     imagepng($img, '/usr/share/nginx/html/'.$name);
     imagedestroy($img);
 
-    return [$name, $values];
+    return $name;
 }

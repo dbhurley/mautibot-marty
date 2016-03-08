@@ -17,12 +17,12 @@ module.exports = (robot) ->
       msg.send "https://marty.mautic.com/" + data.signup_image + "\n"
       message = "Month\tCount\t% Diff\n"
       for k,v of data.signups
-        message = message + "    #{k}\t#{v.count}\t#{v.diff}%\n"
+        message = message + v.date + "\t" + v.count + "\t" + v.diff + "%\n"
       msg.send message
 
       msg.send "\n\nDownloads:\n"
       msg.send "https://marty.mautic.com/" + data.download_image + "\n"
       message = "Month\tCount\t% Diff\n"
       for k,v of data.downloads
-        message = message + "    #{k}\t#{v.count}\t#{v.diff}%\n"
+        message = message + v.date + "\t" + v.count + "\t" + v.diff + "%\n"
       msg.send message
