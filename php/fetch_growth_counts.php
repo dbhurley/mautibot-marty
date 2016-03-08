@@ -46,8 +46,30 @@ $downloads = $communityDb->setQuery(
         ->order('YEAR(date_download), MONTH(date_download)')
     )->loadAssocList();
 
-list ($signupImage, $signupData) = makeImage("SaaS Signups", $signups);
-list ($downloadImage, $downloadData) = makeImage("Downloads", $downloads);
+$signupImage   = makeImage("SaaS Signups", $signups);
+$downloadImage = makeImage("Downloads", $downloads);
+
+// Generate % diffs
+$lastValue = 0;
+foreach ($signups as $k => &$v) {
+    if ($lastValue) {
+        $v['diff'] = 100 * ($v['count'] - $lastValue) / $v['count'];
+    } else {
+        $v['diff'] = 0;
+    }
+
+    $lastValue = $v['count'];
+}
+$lastValue = 0;
+foreach ($downloads as $k => &$v) {
+    if ($lastValue) {
+        $v['diff'] = 100 * ($v['count'] - $lastValue) / $v['count'];
+    } else {
+        $v['diff'] = 0;
+    }
+
+    $lastValue = $v['count'];
+}
 
 header('Content-Type: application/json');
 echo json_encode(

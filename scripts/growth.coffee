@@ -13,6 +13,16 @@ module.exports = (robot) ->
   robot.hear /mautic growth/i, (msg) ->
     exec "php /opt/mautibot/php/fetch_growth_counts.php", (err, stdout, stderr) ->
       data = JSON.parse(stdout);
-      msg.send "SaaS Signups:\nhttps://marty.mautic.com/" + data.signup_image + "\n\n"
-      msg.send "Downloads:\nhttps://marty.mautic.com/" + data.download_image
+      msg.send "SaaS Signups:\n"
+      msg.send "https://marty.mautic.com/" + data.signup_image + "\n"
+      message = "Month\tCount\t% Diff\n"
+      for k,v of data.signups
+        message = message + "    #{k}\t#{v.count}\t#{v.diff}%\n"
+      msg.send message
 
+      msg.send "\n\nDownloads:\n"
+      msg.send "https://marty.mautic.com/" + data.download_image + "\n"
+      message = "Month\tCount\t% Diff\n"
+      for k,v of data.downloads
+        message = message + "    #{k}\t#{v.count}\t#{v.diff}%\n"
+      msg.send message
