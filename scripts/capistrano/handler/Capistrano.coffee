@@ -2,7 +2,7 @@ spawn   = require('child_process').spawn
 carrier = require 'carrier'
 
 class Capistrano
-  execute: (project, username, stage, command, msg) ->
+  execute: (project, username, stage, command, msg, robot) ->
     path = process.env.HUBOT_CAP_DIR + project
     process.chdir(path);
 
@@ -12,25 +12,53 @@ class Capistrano
     env.GEM_HOME = "/usr/local/rvm/gems/ruby-2.3.0"
     env.GEM_PATH = "/usr/local/rvm/gems/ruby-2.3.0:/usr/local/rvm/gems/ruby-2.3.0@global"
     env.USERNAME = username
+    env.USER     = username
+
+    msg.send "Executing `cap #{stage} #{command}` for `#{project}`. Please wait..."
 
     cap = spawn 'bundle', ['exec', 'cap', stage, command], { env: env}
-    @streamResult cap, msg
 
-  streamResult: (cap, msg) ->
+    # Get output then on exit, send to slack
+    @output = ''
+    @streamResult cap
+
+    cap.on 'exit', (code) =>
+      msgData = {
+        message: msg.message
+        attachments: [
+          {
+            fallback: "Type `log [project] [stage]` to see full log",
+            title: "Deployment log"
+            fields: [
+              {
+                title: "Project"
+                value: project
+              },
+              {
+                title: "Stage"
+                value: stage
+              },
+              {
+                title: "Command"
+                value: command
+              }
+            ]
+            text: @output.trim()
+            mrkdwn_in: ["text"]
+          }
+        ]
+      }
+
+      robot.adapter.customMessage msgData
+
+  streamResult: (cap) ->
     capOut = carrier.carry cap.stdout
     capErr = carrier.carry cap.stderr
-    output = ''
 
-    capOut.on 'line', (line) ->
-      output += line + "\n"
+    capOut.on 'line', (line) =>
+      @output += line + "\n"
 
-    capErr.on 'line', (line) ->
-      output += "*" + line + "*\n"
-
-    setInterval () ->
-      if output != ""
-        msg.send output.trim()
-        output = ""
-    , 10000
+    capErr.on 'line', (line) =>
+      @output += "*" + line + "*\n"
 
 module.exports = Capistrano
