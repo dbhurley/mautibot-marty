@@ -17,11 +17,18 @@ module.exports = (robot) ->
     if (permission.hasPermission username, 'global')
       msg.send "Project list: #{folder.getProjects().join(', ')}"
 
-  robot.hear /(cap|capistrano) ([a-z0-9]+) ([a-z0-9]+) (.*)/i, (msg) ->
+  robot.hear /(cap|capistrano|deploy|rollback) ([a-z0-9]+) ([a-z0-9]+)\s?(.*)?/i, (msg) ->
     robot.brain.set('oe', 'a')
-    project  = msg.match[2]
+
+    command = msg.match[4]
+    if msg.match[1] == 'deploy'
+      command = 'deploy' + command
+    else if msg.match[1] == 'rollback'
+      command ='deploy:rollback' + command
+
+    project = msg.match[2]
     stage = msg.match[3]
-    command  = msg.match[4]
+
     username = msg.message.user.name
 
     if (!permission.hasPermission username, 'global')
@@ -37,4 +44,4 @@ module.exports = (robot) ->
 
     msg.send "Please wait..."
 
-    cap.execute project, stage, command, msg
+    cap.execute project, username, stage, command, msg
