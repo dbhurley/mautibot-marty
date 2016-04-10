@@ -35,6 +35,6 @@ module.exports = (robot) ->
       msg.send "Please talk with @#{permission.getUsers(project)}" if permission.getUsers(project).length > 0
       return false
 
-    msg.send "Deploying #{stage} stage for project #{project}. Please wait..."
+    msg.send "Please wait..."
 
     cap.execute project, stage, command, msg
