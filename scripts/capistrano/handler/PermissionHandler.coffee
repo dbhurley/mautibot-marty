@@ -8,7 +8,9 @@ class PermissionHandler
     filePath = @FolderReader.getPath()
 
     if project != "global"
-      filePath += project
+      filePath += project + "/project.json"
+    else
+      filePath += "projects.json"
 
     @searchProject filePath, project
 
@@ -23,9 +25,7 @@ class PermissionHandler
   getUsers: (project) ->
     @projects.get(project).getUsers(project)
 
-  createProject: (path, project) ->
-    jsonPath = "#{path}/project.json"
-
+  createProject: (jsonPath, project) ->
     @projects.newProject(project, jsonPath)
 
 module.exports = PermissionHandler
