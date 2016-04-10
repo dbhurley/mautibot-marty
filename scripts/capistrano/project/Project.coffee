@@ -3,12 +3,13 @@ cjson = require 'cjson'
 class Project
   constructor: (@name, @jsonPath, @exists = true) ->
     @users  = []
+    @stages = []
 
-    @updateUsers()
+    @parseConfig()
 
     setInterval(
       =>
-        @updateUsers()
+        @parseConfig()
       1000
     )
 
@@ -18,9 +19,13 @@ class Project
   getUsers: ->
     @users.join ', '
 
-  updateUsers: ->
+  getStages: ->
+    @stages.join ', '
+
+  parseConfig: ->
     if @jsonPath
       json = cjson.load @jsonPath
       @users = json.users
+      @stages = json.stages
 
 module.exports = Project

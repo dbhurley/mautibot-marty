@@ -25,6 +25,9 @@ class PermissionHandler
   getUsers: (project) ->
     @projects.get(project).getUsers(project)
 
+  getStages: (project) ->
+    @projects.get(project).getStages(project)
+
   createProject: (jsonPath, project) ->
     @projects.newProject(project, jsonPath)
 
