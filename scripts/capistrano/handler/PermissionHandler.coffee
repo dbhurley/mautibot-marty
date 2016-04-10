@@ -5,15 +5,20 @@ class PermissionHandler
     @projects = new ProjectContainer
 
   hasPermission: (user, project) ->
-    @searchProject @FolderReader.getPath() + project, project
+    filePath = @FolderReader.getPath()
+
+    if project != "global"
+      filePath += project
+
+    @searchProject filePath, project
+
     @projects.get(project).hasUser user
 
   searchProject: (path, project) ->
     if (@projects.get(project).exists)
       return true
 
-    @FolderReader.exists path, (exists) =>
-      @createProject(path, project) if exists
+    @createProject(path, project)
 
   getUsers: (project) ->
     @projects.get(project).getUsers(project)
@@ -21,7 +26,6 @@ class PermissionHandler
   createProject: (path, project) ->
     jsonPath = "#{path}/project.json"
 
-    @FolderReader.exists jsonPath, (exists) =>
-      @projects.newProject(project, jsonPath) if exists
+    @projects.newProject(project, jsonPath)
 
 module.exports = PermissionHandler
