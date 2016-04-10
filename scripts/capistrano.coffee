@@ -17,10 +17,22 @@ module.exports = (robot) ->
     if (permission.hasPermission username, 'global')
       msg.send "Project list: #{folder.getProjects().join(', ')}"
 
+  robot.hear /list stages ([a-z0-9]+)/i, (msg) ->
+    username = msg.message.user.name
+
+    if (msg.match[1]?)
+      project = msg.match[1];
+
+      if (permission.hasPermission username, project)
+          msg.send "Stages for #{project} include #{permission.getStages(project)}"
+
   robot.hear /(cap|capistrano|deploy|rollback) ([a-z0-9]+) ([a-z0-9]+)\s?(.*)?/i, (msg) ->
     robot.brain.set('oe', 'a')
 
-    command = msg.match[4]
+    command = ''
+    if (msg.match[4]?)
+      command = msg.match[4]
+
     if msg.match[1] == 'deploy'
       command = 'deploy' + command
     else if msg.match[1] == 'rollback'
@@ -35,13 +47,11 @@ module.exports = (robot) ->
       return false
 
     if (!folder.projectExists project)
-      return msg.send "This project doesn't exists."
+      return msg.send "The project, `#{project}` doesn't exists."
 
     if (!permission.hasPermission username, project)
       msg.send "You don't have permission in this project"
       msg.send "Please talk with @#{permission.getUsers(project)}" if permission.getUsers(project).length > 0
       return false
 
-    msg.send "Please wait..."
-
-    cap.execute project, username, stage, command, msg
+    cap.execute project, username, stage, command, msg, robot
