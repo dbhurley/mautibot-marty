@@ -17,10 +17,15 @@ class Project
     user in @users
 
   getUsers: ->
-    @users.join ', '
+    '@' + @users.join ', @'
 
   getStages: ->
-    @stages.join ', '
+    stages = '`'
+    stages += @stages.join '`, `'
+    stages += '`'
+
+  hasStage: (stage) ->
+    stage in @stages
 
   parseConfig: ->
     if @jsonPath

@@ -24,6 +24,9 @@ class Capistrano
 
     cap.on 'exit', (code) =>
       msgData = {
+        channel: 'deployments'
+        username: 'Marty the Deployer'
+        icon_emoji: ':mautibot:'
         message: msg.message
         attachments: [
           {
@@ -50,6 +53,13 @@ class Capistrano
       }
 
       robot.adapter.customMessage msgData
+
+      channelName = if msg.message.envelope
+        msg.message.envelope.room
+      else msg.message.room
+
+      if channelName != 'deployments'
+        msg.send "Done! Checkout <#G0ZCQHNNB|deployments> for the result."
 
   streamResult: (cap) ->
     capOut = carrier.carry cap.stdout
