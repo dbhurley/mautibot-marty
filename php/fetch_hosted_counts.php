@@ -7,7 +7,7 @@ $db = \Joomla\Database\DatabaseDriver::getInstance(array(
     "port"     => "3307",
     "user"     => "root",
     "password" => "Q3+92*J4e[G7s8",
-    "database" => "dashboard",
+    "database" => "internal_prod_dashboard",
     "prefix"   => "app_"
 ));
 
