@@ -14,6 +14,17 @@ module.exports = (robot) ->
     exec "php /opt/mautibot/php/fetch_download_counts.php", (err, stdout, stderr) ->
       data = JSON.parse(stdout);
       msg.send "There has been #{data.total} total unique downloads with #{data.latest.download_count} for #{data.latest.title} and #{data.today} today"
+      
+  # 
+  # Get count for today
+  #
+  robot.hear /mautic daily/i, (msg) ->
+  	exec "php /opt/mautibot/php/fetch_download_counts.php", (err, stdout, stderr) ->
+  		download_data = JSON.parse(stdout);
+  		exec "php /opt/mautibot/php/fetch_hosted_counts.php", (err, stdout, stderr) ->
+  			hosted_data = JSON.parse(stdout);
+	  		total_daily = +download_data.today + +hosted_data.today;
+  			msg.send "Today there has been #{download_data.today} downloads and #{hosted_data.today} new cloud accounts, for a total of #{total_daily} new accounts."
 
   #
   # Get a count of hosted instances
