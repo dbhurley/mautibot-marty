@@ -29,7 +29,7 @@ $results = $db->setQuery(
         ->group('plan')
 )->loadObjectList();
 
-$planCounts = ['today' => $today, 'total' => 0, 'active within last 30 days' => 0];
+$planCounts = ['total' => 0, 'today' => $today, 'active within last 30 days' => 0];
 foreach ($results as $result) {
     $plan = $result->plan;
     if (empty($plan)) {
