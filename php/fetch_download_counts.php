@@ -33,10 +33,9 @@ $latest = $db->setQuery(
 // Today's downloads
 $todays = $db->setQuery(
     $db->getQuery(true)
-        ->select('count(*) as count')
+        ->select('count(distinct(tracking_id) as count')
         ->from('#__asset_downloads')
         ->where('DATE(date_download) = CURDATE()')
-        ->group('tracking_id')
 )->loadResult();
 
 header('Content-Type: application/json');
