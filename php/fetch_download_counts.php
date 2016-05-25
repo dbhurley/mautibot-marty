@@ -33,7 +33,7 @@ $latest = $db->setQuery(
 // Today's downloads
 $todays = $db->setQuery(
     $db->getQuery(true)
-        ->select('count(distinct(tracking_id) as count')
+        ->select('count(distinct(tracking_id)) as count')
         ->from('#__asset_downloads')
         ->where('DATE(date_download) = CURDATE()')
 )->loadResult();
