@@ -13,7 +13,7 @@ module.exports = (robot) ->
   robot.hear /download count/i, (msg) ->
     exec "php /opt/mautibot/php/fetch_download_counts.php", (err, stdout, stderr) ->
       data = JSON.parse(stdout);
-      msg.send "There has been #{data.total} total unique downloads and #{data.latest.download_count} for #{data.latest.title}"
+      msg.send "There has been #{data.total} total unique downloads with #{data.latest.download_count} for #{data.latest.title} and #{data.today} today"
 
   #
   # Get a count of hosted instances
@@ -33,7 +33,7 @@ module.exports = (robot) ->
   robot.hear /mautic userbase|dchc/i, (msg) ->
     exec "php /opt/mautibot/php/fetch_download_counts.php", (err, stdout, stderr) ->
       data = JSON.parse(stdout);
-      msg.send "There has been #{data.total} total unique downloads and #{data.latest.download_count} for #{data.latest.title}"
+      msg.send "There has been #{data.total} total unique downloads with #{data.latest.download_count} for #{data.latest.title} and #{data.today} today"
     exec "php /opt/mautibot/php/fetch_hosted_counts.php", (err, stdout, stderr) ->
       data = JSON.parse(stdout);
       message = "There are currently: \n"

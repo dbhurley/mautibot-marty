@@ -29,10 +29,23 @@ $latest = $db->setQuery(
     0, 1
 )->loadAssoc();
 
+
+// Today's downloads
+$todays = $db->setQuery(
+    $db->getQuery(true)
+        ->select('count(*) as count')
+        ->from('#__asset_downloads')
+        ->innerJoin('#__assets a ON a.id = asset_id')
+        ->where('a.category_id = 2')
+        ->where('DATE(date_download) = CURDATE()')
+        ->group('a.tracking_id')
+)->loadResult();
+
 header('Content-Type: application/json');
 echo json_encode(
     [
         'total'   => $total,
-        'latest'  => $latest
+        'latest'  => $latest,
+        'today'   => $todays
     ]
 );

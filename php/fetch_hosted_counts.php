@@ -11,6 +11,16 @@ $db = \Joomla\Database\DatabaseDriver::getInstance(array(
     "prefix"   => "app_"
 ));
 
+
+// Today's signups
+$today = $db->setQuery(
+    $db->getQuery(true)
+        ->select('count(*) as count')
+        ->from('#__instances')
+        ->where('status = 1')
+        ->where('DATE(created_at) = CURDATE()')
+)->loadResult();
+
 $results = $db->setQuery(
     $db->getQuery(true)
         ->select('count(*) as number, plan')
@@ -19,7 +29,7 @@ $results = $db->setQuery(
         ->group('plan')
 )->loadObjectList();
 
-$planCounts = ['total' => 0, 'active within last 30 days' => 0];
+$planCounts = ['today' => $today, 'total' => 0, 'active within last 30 days' => 0];
 foreach ($results as $result) {
     $plan = $result->plan;
     if (empty($plan)) {
