@@ -36,7 +36,7 @@ module.exports = (robot) ->
       msg.send "There has been #{data.total} total unique downloads with #{data.latest.download_count} for #{data.latest.title} and #{data.today} today"
     exec "php /opt/mautibot/php/fetch_hosted_counts.php", (err, stdout, stderr) ->
       data = JSON.parse(stdout);
-      message = "There are currently: \n"
+      message = "For SaaS, there are currently: \n"
       for k,v of data
         message = message + "    #{v} #{k}\n"
 
