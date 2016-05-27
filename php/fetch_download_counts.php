@@ -31,11 +31,15 @@ $latest = $db->setQuery(
 
 
 // Today's downloads
+date_default_timezone_set('America/New_York');
+$date = new \DateTime('midnight today');
+$date->setTimezone(new \DateTimeZone('UTC'));
+$fromDate = $date->format('Y-m-d H:i:s');
 $todays = $db->setQuery(
     $db->getQuery(true)
         ->select('count(distinct(tracking_id)) as count')
         ->from('#__asset_downloads')
-        ->where('DATE(date_download) = CURDATE()')
+        ->where('date_download >= ' . $db->q($fromDate))
 )->loadResult();
 
 header('Content-Type: application/json');

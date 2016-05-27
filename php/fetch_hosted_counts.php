@@ -13,12 +13,16 @@ $db = \Joomla\Database\DatabaseDriver::getInstance(array(
 
 
 // Today's signups
+date_default_timezone_set('America/New_York');
+$date = new \DateTime('midnight today');
+$date->setTimezone(new \DateTimeZone('UTC'));
+$fromDate = $date->format('Y-m-d H:i:s');
 $today = $db->setQuery(
     $db->getQuery(true)
         ->select('count(*) as count')
         ->from('#__instances')
         ->where('status = 1')
-        ->where('DATE(created_at) = CURDATE()')
+        ->where('created_at >= ' . $db->q($fromDate))
 )->loadResult();
 
 $results = $db->setQuery(
