@@ -17,8 +17,8 @@ $statsDb = \Joomla\Database\DatabaseDriver::getInstance(array(
     "port"     => "3308",
     "user"     => "root",
     "password" => "m@ut1b0t",
-    "database" => "mautic",
-    "prefix"   => "statsapp"
+    "database" => "statsapp",
+    "prefix"   => ""
 ));
 
 // Get a sum for all downloads
