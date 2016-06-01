@@ -11,6 +11,16 @@ $db = \Joomla\Database\DatabaseDriver::getInstance(array(
     "prefix"   => ""
 ));
 
+$statsDb = \Joomla\Database\DatabaseDriver::getInstance(array(
+    "driver"   => "mysql",
+    "host"     => "127.0.0.1",
+    "port"     => "3308",
+    "user"     => "root",
+    "password" => "m@ut1b0t",
+    "database" => "mautic",
+    "prefix"   => "statsapp"
+));
+
 // Get a sum for all downloads
 $total = $db->setQuery(
     $db->getQuery(true)
@@ -29,7 +39,6 @@ $latest = $db->setQuery(
     0, 1
 )->loadAssoc();
 
-
 // Today's downloads
 date_default_timezone_set('America/New_York');
 $date = new \DateTime('midnight today');
@@ -42,11 +51,20 @@ $todays = $db->setQuery(
         ->where('date_download >= ' . $db->q($fromDate))
 )->loadResult();
 
+// Active accounts
+$active = $statsDb->setQuery(
+    $statsDb->getQuery(true)
+        ->select('count(*)')
+        ->from('Stats')
+        ->where('date(last_updated) BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE()')
+)->loadResult();
+
 header('Content-Type: application/json');
 echo json_encode(
     [
         'total'   => $total,
         'latest'  => $latest,
-        'today'   => $todays
+        'today'   => $todays,
+        'active'  => $active
     ]
 );
