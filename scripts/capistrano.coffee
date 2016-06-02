@@ -11,13 +11,13 @@ cap        = new Capistrano
 
 module.exports = (robot) ->
 
-  robot.hear /list projects/i, (msg) ->
+  robot.hear /mautibot list projects/i, (msg) ->
     username = msg.message.user.name
 
     if (permission.hasPermission username, 'global')
       msg.send "Project list: #{folder.getProjects().join(', ')}"
 
-  robot.hear /list stages ([a-z0-9]+)/i, (msg) ->
+  robot.hear /mautibot list stages ([a-z0-9]+)/i, (msg) ->
     username = msg.message.user.name
 
     if (msg.match[1]?)
@@ -32,7 +32,7 @@ module.exports = (robot) ->
       if (permission.hasPermission username, project)
           msg.send "Stages for `#{project}` include #{permission.getStages(project)}"
 
-  robot.hear /(cap|capistrano|deploy|rollback) ([a-z0-9]+) ([a-z0-9]+)\s?(.*)?/i, (msg) ->
+  robot.hear /mautibot (cap|capistrano|deploy|rollback) ([a-z0-9]+) ([a-z0-9]+)\s?(.*)?/i, (msg) ->
     robot.brain.set('oe', 'a')
 
     command = ''
