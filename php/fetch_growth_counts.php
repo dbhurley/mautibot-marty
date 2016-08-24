@@ -32,7 +32,7 @@ $signups = $dashboardDb->setQuery(
         ->where('created_at >= DATE_SUB(DATE_FORMAT(CURDATE(), \'%Y-%m-01\'), INTERVAL 6 MONTH) AND created_at <  DATE_FORMAT(CURDATE(), \'%Y-%m-01\')')
         ->group('YEAR(created_at), MONTH(created_at)')
         ->order('YEAR(created_at), MONTH(created_at)')
-    )->loadAssocList();
+)->loadAssocList();
 
 // Downloads
 $downloads = $communityDb->setQuery(
@@ -44,7 +44,7 @@ $downloads = $communityDb->setQuery(
         ->where('date_download >= DATE_SUB(DATE_FORMAT(CURDATE(), \'%Y-%m-01\'), INTERVAL 6 MONTH) AND date_download <  DATE_FORMAT(CURDATE(), \'%Y-%m-01\')')
         ->group('YEAR(date_download), MONTH(date_download)')
         ->order('YEAR(date_download), MONTH(date_download)')
-    )->loadAssocList();
+)->loadAssocList();
 
 $signupImage   = makeImage("SaaS Signups", $signups);
 $downloadImage = makeImage("Downloads", $downloads);
@@ -52,23 +52,25 @@ $downloadImage = makeImage("Downloads", $downloads);
 // Generate % diffs
 $lastValue = 0;
 foreach ($signups as $k => &$v) {
-    if ($lastValue) {
-        $v['diff'] = round(100 * ($v['count'] - $lastValue) / $lastValue, 1);
+    if ($totalValue) {
+        $v['diff'] = round(100 * ($v['count'] + $totalValue) / $totalValue, 1) - 100;
     } else {
         $v['diff'] = 0;
     }
 
     $lastValue = $v['count'];
+    $totalValue += $lastValue;
 }
 $lastValue = 0;
 foreach ($downloads as $k => &$v) {
-    if ($lastValue) {
-        $v['diff'] = round(100 * ($v['count'] - $lastValue) / $lastValue, 1);
+    if ($totalValue) {
+        $v['diff'] = round(100 * ($v['count'] + $totalValue) / $totalValue, 1) - 100;
     } else {
         $v['diff'] = 0;
     }
 
     $lastValue = $v['count'];
+    $totalValue += $lastValue;
 }
 
 header('Content-Type: application/json');
