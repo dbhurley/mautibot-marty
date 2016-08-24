@@ -16,7 +16,7 @@ $communityDb = \Joomla\Database\DatabaseDriver::getInstance(array(
     "host"     => "127.0.0.1",
     "port"     => "3308",
     "user"     => "root",
-    "password" => "m@ut1b0t",
+    "password" => "uN2igJ(xNpz7oM",
     "database" => "mautic",
     "prefix"   => ""
 ));
