@@ -68,11 +68,12 @@ module.exports = (robot) ->
   #
   # Get a total count of downloads and hosted
   #
-  robot.hear /mautic github stats\s?(20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))?\s?(20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))?/i, (msg) ->
-    fromDate = if typeof msg.match[1] != 'undefined' then msg.match[1] else ''
-    toDate   = if typeof msg.match[4] != 'undefined' then msg.match[4] else ''
+  robot.hear /mautic github stats\s?(\d+)\s?(20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))?\s?(20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))?/i, (msg) ->
+    topCount = if typeof msg.match[1] != 'undefined' then msg.match[1] else 10
+    fromDate = if typeof msg.match[2] != 'undefined' then msg.match[1] else ''
+    toDate   = if typeof msg.match[5] != 'undefined' then msg.match[4] else ''
 
-    exec "php /opt/mautibot/php/fetch_hubstat_counts.php #{fromDate} #{toDate}", (err, stdout, stderr) ->
+    exec "php /opt/mautibot/php/fetch_hubstat_counts.php #{topCount} #{fromDate} #{toDate}", (err, stdout, stderr) ->
       data    = JSON.parse(stdout);
       message = "*Between #{data['fromDate']} and #{data['toDate']}*\n\n"
       delete data['fromDate'];
@@ -83,7 +84,7 @@ module.exports = (robot) ->
           message = message + "    #{k} `#{v}`\n"
       delete data['prs']
 
-      message = message + "\n*Top 10 Contributors:* (#{data['contributor_string']})\n"
+      message = message + "\n*Top #{topCount} Contributors:* (#{data['contributor_string']})\n"
       for user,groupStats of data['contributors']
         message = message + "    _#{user}_\n"
         for k,v of groupStats
@@ -95,7 +96,7 @@ module.exports = (robot) ->
           message = message + "    #{k} `#{v}`\n"
       delete data['comments']
 
-      message = message + "\n*Top 10 Commentators* (#{data['commenter_string']})\n"
+      message = message + "\n*Top #{topCount} Commentators* (#{data['commenter_string']})\n"
       for user,count of data['commenters']
         message = message + "    #{user}: `#{count}`\n"
       delete data['commenters'];

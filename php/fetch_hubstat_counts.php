@@ -14,7 +14,9 @@ $db = \Joomla\Database\DatabaseDriver::getInstance(
 );
 date_default_timezone_set('America/New_York');
 
-if (isset($argv[1])) {
+$topCount = $argv[1];
+
+if (isset($argv[2])) {
     $fromDate  = new \DateTime($argv[1].' 00:00:00');
     $localFrom = $fromDate->format('Y-m-d H:i:s');
 
@@ -75,7 +77,7 @@ $results      = $db->setQuery(
         ->order('sum(additions) - sum(deletions) desc')
     ,
     0,
-    10
+    $topCount
 )->loadAssocList();
 $contributors = [];
 foreach ($results as $r) {
@@ -101,7 +103,7 @@ $results    = $db->setQuery(
         ->order('COUNT(*) desc')
     ,
     0,
-    10
+    $topCount
 )->loadAssocList();
 $commenters = [];
 foreach ($results as $r) {
