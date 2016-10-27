@@ -17,13 +17,13 @@ date_default_timezone_set('America/New_York');
 $topCount = $argv[1];
 
 if (isset($argv[2])) {
-    $fromDate  = new \DateTime($argv[1].' 00:00:00');
+    $fromDate  = new \DateTime($argv[2].' 00:00:00');
     $localFrom = $fromDate->format('Y-m-d H:i:s');
 
     // Convert to UTC
     $fromDate->setTimezone(new \DateTimeZone('UTC'));
 
-    $toDate  = (isset($argv[2])) ? new \DateTime($argv[2].' 23:59:59') : (new \DateTime('now'))->modify('+1 day midnight - 1 second');
+    $toDate  = (isset($argv[3])) ? new \DateTime($argv[2].' 23:59:59') : (new \DateTime('now'))->modify('+1 day midnight - 1 second');
     $localTo = $toDate->format('Y-m-d H:i:s');
 
     // Convert to UTC
