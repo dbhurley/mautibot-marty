@@ -52,3 +52,40 @@ module.exports = (robot) ->
         message = message + "    #{v} #{k}\n"
 
       msg.send message
+
+  #
+  # Get a total count of downloads and hosted
+  #
+  robot.hear /mautic github stats\s?(20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))?\s?(20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))?/i, (msg) ->
+    fromDate = if typeof msg.match[1] != 'undefined' then msg.match[1] else ''
+    toDate   = if typeof msg.match[4] != 'undefined' then msg.match[4] else ''
+
+    exec "php /opt/mautibot/php/fetch_hubstat_counts.php #{fromDate} #{toDate}", (err, stdout, stderr) ->
+      data    = JSON.parse(stdout);
+      message = "Between #{data['fromDate']} and #{data['toDate']}\n\n"
+      delete data['fromDate'];
+      delete data['toDate'];
+
+      message = message + "\n*Pull Requests:*\n"
+      for k,v of data['prs']
+          message = message + "    #{k} #{v}\n"
+      delete data['prs']
+
+      message = message + "\n*Top 10 Contributors:* (#{data['contributor_string']})\n"
+      for user,groupStats of data['contributors']
+        message = message + "\n    #{user}\n"
+        for k,v of groupStats
+          message = message + "        #{k} #{v}\n"
+      delete data['contributors'];
+
+      message = message + "\n*Comments*\n"
+      for k,v of data['comments']
+          message = message + "    #{k} #{v}\n"
+      delete data['comments']
+
+      message = message + "\n*Top 10 Commentators* (#{data['commenter_string']})\n"
+      for user,count of data['commenters']
+        message = message + "    #{user} #{count}\n"
+      delete data['commenters'];
+
+      msg.send message
