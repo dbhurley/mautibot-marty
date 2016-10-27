@@ -25,6 +25,17 @@ module.exports = (robot) ->
   			hosted_data = JSON.parse(stdout);
 	  		total_daily = +download_data.today + +hosted_data.today;
   			msg.send "Today there has been #{download_data.today} downloads and #{hosted_data.today} new cloud accounts, for a total of #{total_daily} new accounts."
+  			
+  #
+  # Get count for total
+  #
+  robot.hear /mautic total/i, (msg) ->
+  	exec "php /opt/mautibot/php/fetch_download_counts.php", (err, stdout, stderr) ->
+  		download_data = JSON.parse(stdout);
+  		exec "php /opt/mautibot/php/fetch_hosted_counts.php", (err, stdout, stderr) ->
+  			hosted_data = JSON.parse(stdout);
+	  		total_userbase = +download_data.total + +hosted_data.total;
+  			msg.send "In total there have been #{download_data.total} downloads and #{hosted_data.total} new cloud accounts, for a grand total of *#{total_userbase}* new accounts."
 
   #
   # Get a count of hosted instances
@@ -44,11 +55,12 @@ module.exports = (robot) ->
   robot.hear /mautic userbase|dchc/i, (msg) ->
     exec "php /opt/mautibot/php/fetch_download_counts.php", (err, stdout, stderr) ->
       data = JSON.parse(stdout);
+      total_downloads = data.total;
       msg.send "There has been #{data.total} total unique downloads with #{data.latest.download_count} for #{data.latest.title} and #{data.today} today. #{data.active} have been active within the last 30 days."
     exec "php /opt/mautibot/php/fetch_hosted_counts.php", (err, stdout, stderr) ->
-      data = JSON.parse(stdout);
+      hosted_data = JSON.parse(stdout);
       message = "For SaaS, there are currently: \n"
-      for k,v of data
+      for k,v of hosted_data
         message = message + "    #{v} #{k}\n"
 
       msg.send message

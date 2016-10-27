@@ -15,14 +15,14 @@ module.exports = (robot) ->
       data = JSON.parse(stdout);
       msg.send "SaaS Signups:\n"
       msg.send "https://marty.mautic.com/" + data.signup_image + "\n"
-      message = "Month\tCount\t% Diff\n"
+      message = "Month\t\tCount (New)\t\t% Diff\n"
       for k,v of data.signups
-        message = message + v.date + "\t" + v.count + "\t" + v.diff + "%\n"
+        message = message + v.date + "\t\t" + v.count + "\t\t" + v.diff + "%\n"
       msg.send message
 
       msg.send "\n\nDownloads:\n"
       msg.send "https://marty.mautic.com/" + data.download_image + "\n"
-      message = "Month\tCount\t% Diff\n"
+      message = "Month\t\tCount (New)\t\t% Diff\n"
       for k,v of data.downloads
-        message = message + v.date + "\t" + v.count + "\t" + v.diff + "%\n"
+        message = message + v.date + "\t\t" + v.count + "\t\t" + v.diff + "%\n"
       msg.send message
