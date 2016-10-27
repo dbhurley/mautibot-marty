@@ -25,7 +25,7 @@ module.exports = (robot) ->
   			hosted_data = JSON.parse(stdout);
 	  		total_daily = +download_data.today + +hosted_data.today;
   			msg.send "Today there has been #{download_data.today} downloads and #{hosted_data.today} new cloud accounts, for a total of #{total_daily} new accounts."
-  			
+
   #
   # Get count for total
   #
@@ -74,30 +74,30 @@ module.exports = (robot) ->
 
     exec "php /opt/mautibot/php/fetch_hubstat_counts.php #{fromDate} #{toDate}", (err, stdout, stderr) ->
       data    = JSON.parse(stdout);
-      message = "Between #{data['fromDate']} and #{data['toDate']}\n\n"
+      message = "*Between #{data['fromDate']} and #{data['toDate']}*\n\n"
       delete data['fromDate'];
       delete data['toDate'];
 
       message = message + "\n*Pull Requests:*\n"
       for k,v of data['prs']
-          message = message + "    #{k} #{v}\n"
+          message = message + "    #{k} `#{v}`\n"
       delete data['prs']
 
       message = message + "\n*Top 10 Contributors:* (#{data['contributor_string']})\n"
       for user,groupStats of data['contributors']
-        message = message + "\n    #{user}\n"
+        message = message + "    _#{user}_\n"
         for k,v of groupStats
-          message = message + "        #{k} #{v}\n"
+          message = message + "        #{k} `#{v}`\n"
       delete data['contributors'];
 
       message = message + "\n*Comments*\n"
       for k,v of data['comments']
-          message = message + "    #{k} #{v}\n"
+          message = message + "    #{k} `#{v}`\n"
       delete data['comments']
 
       message = message + "\n*Top 10 Commentators* (#{data['commenter_string']})\n"
       for user,count of data['commenters']
-        message = message + "    #{user} #{count}\n"
+        message = message + "    #{user}: `#{count}`\n"
       delete data['commenters'];
 
       msg.send message
