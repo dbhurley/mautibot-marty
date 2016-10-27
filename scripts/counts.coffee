@@ -70,8 +70,8 @@ module.exports = (robot) ->
   #
   robot.hear /mautic github stats\s?(\d+)\s?(20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))?\s?(20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))?/i, (msg) ->
     topCount = if typeof msg.match[1] != 'undefined' then msg.match[1] else 10
-    fromDate = if typeof msg.match[2] != 'undefined' then msg.match[1] else ''
-    toDate   = if typeof msg.match[5] != 'undefined' then msg.match[4] else ''
+    fromDate = if typeof msg.match[2] != 'undefined' then msg.match[2] else ''
+    toDate   = if typeof msg.match[5] != 'undefined' then msg.match[5] else ''
 
     exec "php /opt/mautibot/php/fetch_hubstat_counts.php #{topCount} #{fromDate} #{toDate}", (err, stdout, stderr) ->
       data    = JSON.parse(stdout);
