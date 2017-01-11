@@ -3,7 +3,7 @@ carrier = require 'carrier'
 
 class Capistrano
   execute: (project, username, stage, command, msg, robot) ->
-    exec "cd " + HUBSPOT_CAP_DIR + " && git pull"
+    exec "cd " + HUBSPOT_CAP_DIR + " && git pull && cd../ && bundle install"
     path = process.env.HUBOT_CAP_DIR + project
     process.chdir(path);
 
