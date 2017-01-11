@@ -1,6 +1,13 @@
 FolderReader      = require './capistrano/handler/FolderReader'
 PermissionHandler = require './capistrano/handler/PermissionHandler'
 Capistrano        = require './capistrano/handler/Capistrano'
+{spawn, exec} = require 'child_process'
+
+execCommand = (msg, cmd) ->
+  exec cmd, (error, stdout, stderr) ->
+    msg.send error
+    msg.send stdout
+    msg.send stderr
 
 if (!process.env.HUBOT_CAP_DIR)
   throw new Error 'You must define the env HUBOT_CAP_DIR'
