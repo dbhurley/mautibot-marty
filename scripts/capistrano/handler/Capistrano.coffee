@@ -1,5 +1,12 @@
 spawn   = require('child_process').spawn
 carrier = require 'carrier'
+{spawn, exec} = require 'child_process'
+
+execCommand = (msg, cmd) ->
+  exec cmd, (error, stdout, stderr) ->
+    msg.send error
+    msg.send stdout
+    msg.send stderr
 
 class Capistrano
   execute: (project, username, stage, command, msg, robot) ->
