@@ -14,7 +14,7 @@ $db = \Joomla\Database\DatabaseDriver::getInstance(
 );
 date_default_timezone_set('America/New_York');
 
-$topCount = $argv[1];
+$topCount = (isset($argv[1])) ? $argv[1] : 10;
 
 if (isset($argv[2])) {
     $fromDate  = new \DateTime($argv[2].' 00:00:00');

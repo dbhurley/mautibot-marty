@@ -24,7 +24,7 @@ class Capistrano
 
     msg.send "Executing `cap #{stage} #{command}` for `#{project}`. Please wait..."
 
-    cap = spawn 'bundle', ['exec', 'cap', stage, command], { env: env}
+    cap = spawn 'bundle', ['exec', 'cap', stage, command], { env: env, timeout: 0}
 
     # Get output then on exit, send to slack
     @output = ''

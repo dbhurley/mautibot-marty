@@ -51,8 +51,9 @@ $downloadImage = makeImage("Downloads", $downloads);
 
 // Generate % diffs
 $lastValue = 0;
+$totalValue = 0;
 foreach ($signups as $k => &$v) {
-    if ($totalValue) { 
+    if ($totalValue) {
         $v['diff'] = round(100 * ($v['count'] + $totalValue) / $totalValue, 1) - 100;
     } else {
         $v['diff'] = 0;
@@ -62,6 +63,7 @@ foreach ($signups as $k => &$v) {
     $totalValue += $lastValue;
 }
 $lastValue = 0;
+$totalValue = 0;
 foreach ($downloads as $k => &$v) {
     if ($totalValue) {
         $v['diff'] = round(100 * ($v['count'] + $totalValue) / $totalValue, 1) - 100;
